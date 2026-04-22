@@ -1,38 +1,76 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import SessionListCard from '../components/SessionListCard';
+import { fetchSessions } from '../api/api';
 
 const SessionsScreen = ({ navigation }) => {
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorText, setErrorText] = useState('');
+
+  useEffect(() => {
+    loadSessions();
+  }, []);
+
+  const loadSessions = async () => {
+    try {
+      setLoading(true);
+      setErrorText('');
+      const data = await fetchSessions();
+      setSessions(data);
+    } catch (error) {
+      setErrorText('Failed to load sessions. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2F7A55" />
+        <Text style={styles.infoText}>Loading sessions...</Text>
+      </View>
+    );
+  }
+
+  if (errorText) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{errorText}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sessions</Text>
+      <Text style={styles.title}>Explore Sessions</Text>
 
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() =>
-          navigation.navigate("SessionDetails", {
-            title: "Nature Walk",
-            age: "4-8",
-            duration: "30 min",
-          })
-        }
-      >
-        <Text style={styles.cardTitle}>Nature Walk</Text>
-        <Text style={styles.cardMeta}>Tap to view details</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() =>
-          navigation.navigate("SessionDetails", {
-            title: "Paper Bridge Builder",
-            age: "7-10",
-            duration: "40 min",
-          })
-        }
-      >
-        <Text style={styles.cardTitle}>Paper Bridge Builder</Text>
-        <Text style={styles.cardMeta}>Tap to view details</Text>
-      </TouchableOpacity>
+      <FlatList
+        data={sessions}
+        renderItem={({ item }) => (
+          <SessionListCard
+            title={item.title}
+            body={item.body}
+            onPress={() =>
+              navigation.navigate('SessionDetails', {
+                itemId: item.id,
+                title: item.title,
+                body: item.body,
+              })
+            }
+          />
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };
@@ -42,29 +80,32 @@ export default SessionsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F0E8',
     padding: 20,
-    backgroundColor: "#F5F0E8",
+  },
+  listContent: {
+    paddingBottom: 24,
   },
   title: {
     fontSize: 22,
-    fontWeight: "700",
-    color: "#1F2A24",
-    marginBottom: 20,
+    fontWeight: '700',
+    color: '#1F2A24',
+    marginBottom: 16,
   },
-  card: {
+  centered: {
+    flex: 1,
+    backgroundColor: '#F5F0E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  infoText: {
     marginTop: 12,
-    padding: 20,
-    backgroundColor: "#FFFDF9",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E8E0D5",
+    color: '#6E756F',
   },
-  cardTitle: {
-    fontWeight: "700",
-    color: "#1F2A24",
-  },
-  cardMeta: {
-    marginTop: 6,
-    color: "#6E756F",
+  errorText: {
+    color: '#B00020',
+    fontSize: 15,
+    textAlign: 'center',
   },
 });

@@ -1,89 +1,111 @@
-# OIKEON — Cross Assignment 4
+# OIKEON — Cross Assignment 5
 
 ## Project Overview
 
 OIKEON is a family-centered mobile learning application.  
-In this assignment, navigation was implemented in React Native based on the previously designed interface.
+In this assignment, API integration was added to the existing React Native project.
 
-## Navigation Structure
+The goal was to fetch remote data, store it in component state, display it in a list, handle loading and error states, and integrate the data flow with navigation.
 
-The project uses:
+---
 
-- **Tab Navigation** for the main app sections:
-  - Home
-  - Sessions
-  - Profile
+## API Choice
 
-- **Stack Navigation** for linear transitions:
-  - Home → Confirmation
-  - Sessions → Session Details
+For this project, a public REST API was used:
 
-## Data Passing Between Screens
+`https://jsonplaceholder.typicode.com/posts`
 
-Navigation parameters are passed with `navigation.navigate()`.
+Because the app theme does not have a direct public API for OIKEON content, JSONPlaceholder was used as a reliable mock API source.  
+The fetched posts were treated as learning sessions / activities.
 
-Examples used in the project:
+---
 
-- `sessionId`
-- `sessionTitle`
-- `title`
-- `age`
-- `duration`
+## Features Implemented
 
-The destination screens read these values through `route.params`.
+- GET request to public REST API
+- API logic moved to a separate file (`api.js`)
+- State management with `useState`
+- Data loading with `useEffect`
+- `FlatList` for rendering session items
+- Custom reusable card component for list items
+- Loading indicator with `ActivityIndicator`
+- Error handling with user-friendly message
+- Navigation to details screen with parameter passing
 
-## Styling
-
-Navigation elements were styled to match the OIKEON interface:
-
-- soft background colors
-- custom header appearance
-- styled tabs
-- consistent spacing and typography
+---
 
 ## Project Structure
 
 ```bash
 src
-├── app
-│   ├── _layout.tsx
-│   └── index.tsx
+├── api
+│   └── api.js
 ├── components
-├── constants
+│   └── SessionListCard.jsx
 ├── navigation
 │   ├── AppNavigator.js
 │   ├── HomeStack.js
 │   ├── SessionsStack.js
 │   └── TabsNavigator.js
-└── screens
-    ├── ConfirmationScreen.jsx
-    ├── HomeScreen.jsx
-    ├── ProfileScreen.jsx
-    ├── SessionDetailsScreen.jsx
-    └── SessionsScreen.jsx
+├── screens
+│   ├── ConfirmationScreen.jsx
+│   ├── HomeScreen.jsx
+│   ├── ProfileScreen.jsx
+│   ├── SessionDetailsScreen.jsx
+│   └── SessionsScreen.jsx
 ```
+
+---
+
+## API Logic
+
+The request logic is isolated in:
+
+`src/api/api.js`
+
+This improves modularity and keeps screen components cleaner.
+
+---
+
+## Navigation Integration
+
+The fetched data is displayed inside `SessionsScreen`, and each item supports navigation to `SessionDetailsScreen`.
+
+When a user taps a session card, the following parameters are passed:
+
+- `itemId`
+- `title`
+- `body`
+
+These values are received via `route.params` and rendered on the details screen.
+
+---
+
+## Loading and Error Handling
+
+The project includes:
+
+- loading state with `ActivityIndicator`
+- error state with descriptive fallback text
+- safe handling of route parameters in the details screen
+
+---
 
 ## Screenshots
 
-### Home Screen
+### Sessions List
 
 ![alt text](image.png)
 
-### Confirmation Screen
+### Session Details
 
 ![alt text](image-1.png)
 
-### Sessions Screen
+### Home Screen
 
 ![alt text](image-2.png)
 
-### Session Details Screen
-
-![alt text](image-3.png)
-
-### Profile Screen
-
-![alt text](image-4.png)
+---
 
 ## How to Run
 
@@ -92,23 +114,33 @@ npm install
 npx expo start -c
 ```
 
-Then press `w` to open in browser or use Expo Go on a mobile device.
+Then:
+
+- press `w` to open in browser
+- or scan the QR code with Expo Go
+
+---
 
 ## Technologies Used
 
 - React Native
 - Expo
-- Expo Router
+- Axios
 - React Navigation
-- Native Stack Navigator
-- Bottom Tabs Navigator
+- Expo Router
+- FlatList
+- ActivityIndicator
+
+---
 
 ## Assignment Requirements Covered
 
-- navigation structure designed and implemented
-- Stack and Tab navigation used
-- data passed between screens
-- route parameters handled safely
-- navigation placed in separate files
-- navigation elements styled
+- public REST API integrated
+- GET request implemented with Axios
+- API logic moved to separate file
+- data stored in component state
+- items displayed with FlatList
+- loading and error states added
+- navigation integrated with details screen
+- parameters passed between screens
 - screenshots added to README
