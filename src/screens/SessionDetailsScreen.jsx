@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import dayjs from 'dayjs';
 import { useTheme } from '../context/ThemeContext';
 
 const SessionDetailsScreen = ({ route }) => {
@@ -8,6 +9,11 @@ const SessionDetailsScreen = ({ route }) => {
   const itemId = route?.params?.itemId;
   const title = route?.params?.title;
   const body = route?.params?.body;
+
+  const openedDate = useMemo(() => {
+    console.log('useMemo: formatting opened date');
+    return dayjs().format('DD MMM YYYY');
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -19,6 +25,10 @@ const SessionDetailsScreen = ({ route }) => {
 
       <Text style={[styles.meta, { color: colors.subtext }]}>
         Item ID: {itemId ?? 'Not provided'}
+      </Text>
+
+      <Text style={[styles.meta, { color: colors.subtext }]}>
+        Opened: {openedDate}
       </Text>
 
       <Text style={[styles.body, { color: colors.text }]}>
@@ -48,10 +58,11 @@ const styles = StyleSheet.create({
   },
   meta: {
     fontSize: 14,
-    marginBottom: 16,
+    marginBottom: 10,
   },
   body: {
     fontSize: 16,
     lineHeight: 24,
+    marginTop: 8,
   },
 });

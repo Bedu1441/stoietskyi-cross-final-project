@@ -1,13 +1,37 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-const SavedSessionItem = ({ title, quantity, onDecrease, onIncrease, onRemove }) => {
+const SavedSessionItem = ({
+  title,
+  quantity,
+  expanded,
+  onToggleExpand,
+  onDecrease,
+  onIncrease,
+  onRemove,
+}) => {
   const { colors } = useTheme();
+
+  console.log('Render AFTER:', title);
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+      <TouchableOpacity onPress={onToggleExpand} activeOpacity={0.8}>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.hint, { color: colors.subtext }]}>
+          Tap to {expanded ? 'collapse' : 'expand'}
+        </Text>
+      </TouchableOpacity>
+
+      {expanded ? (
+        <View style={styles.expandedContent}>
+          <Text style={[styles.description, { color: colors.subtext }]}>
+            This saved session is managed by Redux. Quantity changes and removal
+            are animated with LayoutAnimation.
+          </Text>
+        </View>
+      ) : null}
 
       <View style={styles.row}>
         <View style={styles.quantityRow}>
@@ -51,8 +75,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: 4,
     textTransform: 'capitalize',
+  },
+  hint: {
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  expandedContent: {
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
   },
   row: {
     flexDirection: 'row',
@@ -92,4 +127,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SavedSessionItem;
+export default memo(SavedSessionItem);

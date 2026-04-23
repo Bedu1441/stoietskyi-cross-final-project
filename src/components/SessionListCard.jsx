@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import dayjs from 'dayjs';
 import { useTheme } from '../context/ThemeContext';
 
 const SessionListCard = ({ title, body, onPress, onSave }) => {
   const { colors } = useTheme();
+
+  console.log('Render AFTER:', title);
 
   return (
     <TouchableOpacity
@@ -15,6 +18,10 @@ const SessionListCard = ({ title, body, onPress, onSave }) => {
 
       <Text style={[styles.body, { color: colors.subtext }]} numberOfLines={2}>
         {body}
+      </Text>
+
+      <Text style={[styles.date, { color: colors.subtext }]}>
+        Updated: {dayjs().format('DD MMM YYYY')}
       </Text>
 
       <View style={styles.actionsRow}>
@@ -51,6 +58,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  date: {
+    marginTop: 8,
+    fontSize: 12,
+  },
   actionsRow: {
     marginTop: 14,
     flexDirection: 'row',
@@ -72,4 +83,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SessionListCard;
+export default memo(SessionListCard);

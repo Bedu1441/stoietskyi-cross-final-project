@@ -1,71 +1,147 @@
-# OIKEON — Cross Assignment 6
+# OIKEON — Cross Assignment 7
 
 ## Project Overview
 
-OIKEON is a family-centered mobile learning application.  
-In this assignment, global state management was added using **Context API** and **Redux Toolkit**.
+OIKEON is a family-centered mobile learning application built with React Native and Expo.
 
-The goal was to integrate two different global state approaches into the existing React Native project:
-
-- Context API for theme management
-- Redux for saved sessions management
+This assignment focuses on animation, render optimization, and dependency cleanup / bundle optimization.
 
 ---
 
-## State Management Choices
+## Task 1: Project Analysis
 
-### Context API
+### Component selected for animation
 
-Used for:
-
-- **theme switching** (`light` / `dark`)
+The **Saved Sessions** list in `ProfileScreen` was selected for animation.
 
 Why:
 
-- theme is a global UI concern
-- it affects multiple components at the same time
-- Context API is a simple and suitable solution for UI-wide state
+- saved sessions can expand / collapse;
+- quantity can be updated;
+- items can be removed;
+- all of these actions change the layout and are suitable for layout animation.
 
-### Redux Toolkit
+### Component selected for render optimization
 
-Used for:
-
-- **saved sessions list**
+The **SessionListCard** component inside `FlatList` was selected for render optimization.
 
 Why:
 
-- saved sessions require multiple operations:
-  - add item
-  - remove item
-  - update quantity
-- Redux Toolkit provides a clean and scalable structure for this kind of state
+- it is rendered many times in a list;
+- it receives callback props;
+- unnecessary rerenders can happen when parent state changes.
+
+### Dependency cleanup / bundle optimization
+
+A lightweight date utility was used:
+
+- `dayjs`
+
+The project avoids heavier date libraries such as `moment`.  
+`dayjs` is used for simple date formatting in the list and details screen.
 
 ---
 
-## Features Implemented
+## Task 2: Animation
 
-### Context API
+Animation was implemented with **LayoutAnimation**.
 
-- `ThemeContext` created in a separate file
-- `ThemeProvider` wraps the application
-- `toggleTheme()` implemented
-- `useContext` access added through custom `useTheme()` hook
-- theme applied to multiple screens and components:
-  - HomeScreen
-  - ProfileScreen
-  - SessionListCard
-  - SessionDetailsScreen
+Location:
 
-### Redux Toolkit
+- `src/screens/ProfileScreen.jsx`
+- `src/components/SavedSessionItem.jsx`
 
-- store configured with `configureStore`
-- `savedSessionsSlice` created
-- reducers implemented:
-  - `addSavedSession`
-  - `removeSavedSession`
-  - `updateQuantity`
-- Redux `Provider` integrated at app root
-- `useSelector` and `useDispatch` used in screens
+Animated interactions:
+
+- expand / collapse saved session item;
+- increase quantity;
+- decrease quantity;
+- remove saved session.
+
+For Android, layout animation support is enabled with:
+
+```javascript
+UIManager.setLayoutAnimationEnabledExperimental?.(true);
+```
+
+---
+
+## Task 3: Render Optimization
+
+The following optimizations were implemented:
+
+### React.memo
+
+Used in:
+
+- `SessionListCard.jsx`
+- `SavedSessionItem.jsx`
+
+This prevents unnecessary rerenders when props do not change.
+
+### useCallback
+
+Used in:
+
+- `SessionsScreen.jsx`
+- `ProfileScreen.jsx`
+
+This keeps callback props stable between renders.
+
+### useMemo
+
+Used in:
+
+- `SessionsScreen.jsx`
+- `SessionDetailsScreen.jsx`
+
+This avoids repeated calculations such as preparing visible sessions and formatting dates.
+
+### Verification
+
+Console logs were added to selected components:
+
+```javascript
+console.log("Render SessionListCard:", title);
+console.log("Render SavedSessionItem:", title);
+```
+
+These logs help verify when list items rerender.
+
+---
+
+## Task 4: Dependency / Bundle Optimization
+
+The project uses `dayjs` for date formatting.
+
+Reason:
+
+- simple API;
+- lightweight;
+- avoids adding heavier date utility libraries.
+
+The dependency check was done through `package.json`.
+No unnecessary large utility libraries such as `moment` or full `lodash` are required for the current implementation.
+
+---
+
+## Screenshots
+
+### Animation — Saved Sessions
+
+![alt text](image.png)
+
+### Before Optimization
+
+![alt text](image-1.png)
+
+### After Optimization
+
+![alt text](image-3.png)
+
+### Bundle / Dependency Check
+
+![alt text](image-2.png)
 
 ---
 
@@ -79,8 +155,6 @@ src
 │   ├── SavedSessionItem.jsx
 │   ├── SessionCard.jsx
 │   └── SessionListCard.jsx
-├── constants
-│   └── theme.js
 ├── context
 │   └── ThemeContext.js
 ├── redux
@@ -102,58 +176,6 @@ src
 
 ---
 
-## Context API Usage
-
-The theme state is shared globally using Context API.
-
-Users can toggle between light and dark mode.
-The selected theme affects:
-
-- background color
-- text color
-- card color
-- border color
-- button color
-
-This is applied on at least two screens and reused across components.
-
----
-
-## Redux Usage
-
-The saved sessions flow works like this:
-
-1. sessions are loaded from API
-2. user presses **Save**
-3. selected session is added to Redux store
-4. saved sessions are displayed in Profile screen
-5. user can:
-   - increase quantity
-   - decrease quantity
-   - remove session
-
----
-
-## Screenshots
-
-### Light Theme
-
-![alt text](image.png)
-
-### Dark Theme
-
-![alt text](image-1.png)
-
-### Sessions List
-
-![alt text](image-2.png)
-
-### Saved Sessions
-
-![alt text](image-3.png)
-
----
-
 ## How to Run
 
 ```bash
@@ -161,10 +183,13 @@ npm install
 npx expo start -c
 ```
 
-Then:
+Then press:
 
-- press `w` for browser
-- or use Expo Go on a mobile device
+```bash
+w
+```
+
+to open the web version.
 
 ---
 
@@ -172,22 +197,25 @@ Then:
 
 - React Native
 - Expo
-- Expo Router
-- React Navigation
-- Context API
+- LayoutAnimation
+- React.memo
+- useMemo
+- useCallback
 - Redux Toolkit
-- React Redux
-- Axios
+- Context API
+- Day.js
 
 ---
 
 ## Assignment Requirements Covered
 
-- Context API integrated into project
-- Redux Toolkit integrated into project
-- providers connected to root component
-- modular structure used
-- state applied across multiple components
-- Redux reducers support add / remove / update
-- props used where needed
-- README includes screenshots
+- Animation implemented with LayoutAnimation
+- Frequently rerendered list components optimized with React.memo
+- useMemo added for stable derived values
+- useCallback added for stable callback props
+- Dependency review completed
+- Lightweight date utility used
+- README includes explanation of optimizations
+- Screenshots section prepared for before / after and bundle analysis
+
+---

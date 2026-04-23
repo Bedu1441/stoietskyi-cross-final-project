@@ -1,14 +1,75 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import SavedSessionItem from '../components/SavedSessionItem';
-import { removeSavedSession, updateQuantity } from '../redux/slices/savedSessionsSlice';
+import {
+  removeSavedSession,
+  updateQuantity,
+} from '../redux/slices/savedSessionsSlice';
 import { useTheme } from '../context/ThemeContext';
+
+if (Platform.OS === 'android') {
+  UIManager.setLayoutAnimationEnabledExperimental?.(true);
+}
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
   const savedSessions = useSelector((state) => state.savedSessions.items);
   const { theme, colors, toggleTheme } = useTheme();
+
+  const [expandedId, setExpandedId] = useState(null);
+
+  const animateNextLayout = () => {
+    LayoutAnimation.easeInEaseOut();
+  };
+
+  const handleToggleExpand = useCallback((id) => {
+    animateNextLayout();
+    setExpandedId((currentId) => (currentId === id ? null : id));
+  }, []);
+
+  const handleDecrease = useCallback(
+    (item) => {
+      animateNextLayout();
+      dispatch(
+        updateQuantity({
+          id: item.id,
+          quantity: item.quantity - 1,
+        })
+      );
+    },
+    [dispatch]
+  );
+
+  const handleIncrease = useCallback(
+    (item) => {
+      animateNextLayout();
+      dispatch(
+        updateQuantity({
+          id: item.id,
+          quantity: item.quantity + 1,
+        })
+      );
+    },
+    [dispatch]
+  );
+
+  const handleRemove = useCallback(
+    (id) => {
+      animateNextLayout();
+      dispatch(removeSavedSession(id));
+    },
+    [dispatch]
+  );
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
@@ -25,7 +86,11 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Saved Sessions (Redux)
+          Saved Sessions
+        </Text>
+
+        <Text style={[styles.note, { color: colors.subtext }]}>
+          LayoutAnimation is used when items expand, update quantity, or are removed.
         </Text>
 
         {savedSessions.length === 0 ? (
@@ -38,23 +103,11 @@ export default function ProfileScreen() {
               key={item.id}
               title={item.title}
               quantity={item.quantity}
-              onDecrease={() =>
-                dispatch(
-                  updateQuantity({
-                    id: item.id,
-                    quantity: item.quantity - 1,
-                  })
-                )
-              }
-              onIncrease={() =>
-                dispatch(
-                  updateQuantity({
-                    id: item.id,
-                    quantity: item.quantity + 1,
-                  })
-                )
-              }
-              onRemove={() => dispatch(removeSavedSession(item.id))}
+              expanded={expandedId === item.id}
+              onToggleExpand={() => handleToggleExpand(item.id)}
+              onDecrease={() => handleDecrease(item)}
+              onIncrease={() => handleIncrease(item)}
+              onRemove={() => handleRemove(item.id)}
             />
           ))
         )}
@@ -89,6 +142,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+    marginBottom: 8,
+  },
+  note: {
+    fontSize: 13,
     marginBottom: 12,
   },
   emptyText: {

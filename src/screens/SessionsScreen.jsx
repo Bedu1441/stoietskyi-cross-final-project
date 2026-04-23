@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ const SessionsScreen = ({ navigation }) => {
     try {
       setLoading(true);
       setErrorText('');
+
       const data = await fetchSessions();
       setSessions(data);
     } catch (error) {
@@ -36,6 +37,49 @@ const SessionsScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
+
+  const visibleSessions = useMemo(() => {
+    console.log('useMemo: preparing visible sessions');
+    return sessions.slice(0, 12);
+  }, [sessions]);
+
+  const handleOpenDetails = useCallback(
+    (item) => {
+      navigation.navigate('SessionDetails', {
+        itemId: item.id,
+        title: item.title,
+        body: item.body,
+      });
+    },
+    [navigation]
+  );
+
+  const handleSaveSession = useCallback(
+    (item) => {
+      dispatch(
+        addSavedSession({
+          id: item.id,
+          title: item.title,
+          body: item.body,
+        })
+      );
+    },
+    [dispatch]
+  );
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <SessionListCard
+        title={item.title}
+        body={item.body}
+        onPress={() => handleOpenDetails(item)}
+        onSave={() => handleSaveSession(item)}
+      />
+    ),
+    [handleOpenDetails, handleSaveSession]
+  );
+
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
 
   if (loading) {
     return (
@@ -51,40 +95,27 @@ const SessionsScreen = ({ navigation }) => {
   if (errorText) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.danger }]}>{errorText}</Text>
+        <Text style={[styles.errorText, { color: colors.danger }]}>
+          {errorText}
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Explore Sessions</Text>
+      <Text style={[styles.title, { color: colors.text }]}>
+        Explore Sessions
+      </Text>
+
+      <Text style={[styles.note, { color: colors.subtext }]}>
+        Optimized with React.memo, useMemo and useCallback.
+      </Text>
 
       <FlatList
-        data={sessions}
-        renderItem={({ item }) => (
-          <SessionListCard
-            title={item.title}
-            body={item.body}
-            onPress={() =>
-              navigation.navigate('SessionDetails', {
-                itemId: item.id,
-                title: item.title,
-                body: item.body,
-              })
-            }
-            onSave={() =>
-              dispatch(
-                addSavedSession({
-                  id: item.id,
-                  title: item.title,
-                  body: item.body,
-                })
-              )
-            }
-          />
-        )}
-        keyExtractor={(item) => item.id.toString()}
+        data={visibleSessions}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
@@ -105,6 +136,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
+    marginBottom: 8,
+  },
+  note: {
+    fontSize: 13,
     marginBottom: 16,
   },
   centered: {
