@@ -1,36 +1,71 @@
-# OIKEON — Cross Assignment 5
+# OIKEON — Cross Assignment 6
 
 ## Project Overview
 
 OIKEON is a family-centered mobile learning application.  
-In this assignment, API integration was added to the existing React Native project.
+In this assignment, global state management was added using **Context API** and **Redux Toolkit**.
 
-The goal was to fetch remote data, store it in component state, display it in a list, handle loading and error states, and integrate the data flow with navigation.
+The goal was to integrate two different global state approaches into the existing React Native project:
+
+- Context API for theme management
+- Redux for saved sessions management
 
 ---
 
-## API Choice
+## State Management Choices
 
-For this project, a public REST API was used:
+### Context API
 
-`https://jsonplaceholder.typicode.com/posts`
+Used for:
 
-Because the app theme does not have a direct public API for OIKEON content, JSONPlaceholder was used as a reliable mock API source.  
-The fetched posts were treated as learning sessions / activities.
+- **theme switching** (`light` / `dark`)
+
+Why:
+
+- theme is a global UI concern
+- it affects multiple components at the same time
+- Context API is a simple and suitable solution for UI-wide state
+
+### Redux Toolkit
+
+Used for:
+
+- **saved sessions list**
+
+Why:
+
+- saved sessions require multiple operations:
+  - add item
+  - remove item
+  - update quantity
+- Redux Toolkit provides a clean and scalable structure for this kind of state
 
 ---
 
 ## Features Implemented
 
-- GET request to public REST API
-- API logic moved to a separate file (`api.js`)
-- State management with `useState`
-- Data loading with `useEffect`
-- `FlatList` for rendering session items
-- Custom reusable card component for list items
-- Loading indicator with `ActivityIndicator`
-- Error handling with user-friendly message
-- Navigation to details screen with parameter passing
+### Context API
+
+- `ThemeContext` created in a separate file
+- `ThemeProvider` wraps the application
+- `toggleTheme()` implemented
+- `useContext` access added through custom `useTheme()` hook
+- theme applied to multiple screens and components:
+  - HomeScreen
+  - ProfileScreen
+  - SessionListCard
+  - SessionDetailsScreen
+
+### Redux Toolkit
+
+- store configured with `configureStore`
+- `savedSessionsSlice` created
+- reducers implemented:
+  - `addSavedSession`
+  - `removeSavedSession`
+  - `updateQuantity`
+- Redux `Provider` integrated at app root
+- `useSelector` and `useDispatch` used in screens
 
 ---
 
@@ -41,69 +76,81 @@ src
 ├── api
 │   └── api.js
 ├── components
+│   ├── SavedSessionItem.jsx
+│   ├── SessionCard.jsx
 │   └── SessionListCard.jsx
+├── constants
+│   └── theme.js
+├── context
+│   └── ThemeContext.js
+├── redux
+│   ├── store.js
+│   └── slices
+│       └── savedSessionsSlice.js
 ├── navigation
 │   ├── AppNavigator.js
 │   ├── HomeStack.js
 │   ├── SessionsStack.js
 │   └── TabsNavigator.js
-├── screens
-│   ├── ConfirmationScreen.jsx
-│   ├── HomeScreen.jsx
-│   ├── ProfileScreen.jsx
-│   ├── SessionDetailsScreen.jsx
-│   └── SessionsScreen.jsx
+└── screens
+    ├── ConfirmationScreen.jsx
+    ├── HomeScreen.jsx
+    ├── ProfileScreen.jsx
+    ├── SessionDetailsScreen.jsx
+    └── SessionsScreen.jsx
 ```
 
 ---
 
-## API Logic
+## Context API Usage
 
-The request logic is isolated in:
+The theme state is shared globally using Context API.
 
-`src/api/api.js`
+Users can toggle between light and dark mode.
+The selected theme affects:
 
-This improves modularity and keeps screen components cleaner.
+- background color
+- text color
+- card color
+- border color
+- button color
 
----
-
-## Navigation Integration
-
-The fetched data is displayed inside `SessionsScreen`, and each item supports navigation to `SessionDetailsScreen`.
-
-When a user taps a session card, the following parameters are passed:
-
-- `itemId`
-- `title`
-- `body`
-
-These values are received via `route.params` and rendered on the details screen.
+This is applied on at least two screens and reused across components.
 
 ---
 
-## Loading and Error Handling
+## Redux Usage
 
-The project includes:
+The saved sessions flow works like this:
 
-- loading state with `ActivityIndicator`
-- error state with descriptive fallback text
-- safe handling of route parameters in the details screen
+1. sessions are loaded from API
+2. user presses **Save**
+3. selected session is added to Redux store
+4. saved sessions are displayed in Profile screen
+5. user can:
+   - increase quantity
+   - decrease quantity
+   - remove session
 
 ---
 
 ## Screenshots
 
-### Sessions List
+### Light Theme
 
 ![alt text](image.png)
 
-### Session Details
+### Dark Theme
 
 ![alt text](image-1.png)
 
-### Home Screen
+### Sessions List
 
 ![alt text](image-2.png)
+
+### Saved Sessions
+
+![alt text](image-3.png)
 
 ---
 
@@ -116,8 +163,8 @@ npx expo start -c
 
 Then:
 
-- press `w` to open in browser
-- or scan the QR code with Expo Go
+- press `w` for browser
+- or use Expo Go on a mobile device
 
 ---
 
@@ -125,22 +172,22 @@ Then:
 
 - React Native
 - Expo
-- Axios
-- React Navigation
 - Expo Router
-- FlatList
-- ActivityIndicator
+- React Navigation
+- Context API
+- Redux Toolkit
+- React Redux
+- Axios
 
 ---
 
 ## Assignment Requirements Covered
 
-- public REST API integrated
-- GET request implemented with Axios
-- API logic moved to separate file
-- data stored in component state
-- items displayed with FlatList
-- loading and error states added
-- navigation integrated with details screen
-- parameters passed between screens
-- screenshots added to README
+- Context API integrated into project
+- Redux Toolkit integrated into project
+- providers connected to root component
+- modular structure used
+- state applied across multiple components
+- Redux reducers support add / remove / update
+- props used where needed
+- README includes screenshots

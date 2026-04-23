@@ -1,39 +1,53 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import AppHeader from "../components/AppHeader";
-import SessionCard from "../components/SessionCard";
-import { COLORS } from "../constants/colors";
-import { SPACING } from "../constants/spacing";
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import AppHeader from '../components/AppHeader';
+import SessionCard from '../components/SessionCard';
+import { useTheme } from '../context/ThemeContext';
 
 const HomeScreen = ({ navigation }) => {
+  const { theme, colors, toggleTheme } = useTheme();
+
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <AppHeader title="OIKEON" rightBadge="👤" />
 
-        <Text style={styles.greeting}>Good morning, Sarah 👋</Text>
-        <Text style={styles.sub}>Ready for today’s family activity?</Text>
+        <Text style={[styles.greeting, { color: colors.text }]}>
+          Good morning, Sarah 👋
+        </Text>
+
+        <Text style={[styles.sub, { color: colors.subtext }]}>
+          Ready for today’s family activity?
+        </Text>
 
         <SessionCard
           title="Nature Scavenger Hunt"
           subtitle="Weekly Pick"
           age="Age 4-8"
           duration="45 min"
-          backgroundColor={COLORS.primary}
+          backgroundColor={colors.primary}
           large
           ctaText="Start"
         />
 
+        <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={toggleTheme}>
+          <Text style={[styles.buttonText, { color: colors.primaryText }]}>
+            Toggle Theme ({theme})
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.secondaryButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={() =>
-            navigation.navigate("Confirmation", {
+            navigation.navigate('Confirmation', {
               sessionId: 1,
-              sessionTitle: "Nature Scavenger Hunt",
+              sessionTitle: 'Nature Scavenger Hunt',
             })
           }
         >
-          <Text style={styles.buttonText}>Open Confirmation</Text>
+          <Text style={[styles.secondaryButtonText, { color: colors.text }]}>
+            Open Confirmation
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -45,32 +59,37 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   content: {
-    padding: SPACING.md,
+    padding: 16,
     maxWidth: 420,
-    width: "100%",
-    alignSelf: "center",
+    width: '100%',
+    alignSelf: 'center',
   },
   greeting: {
     fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.text,
+    fontWeight: '700',
   },
   sub: {
-    marginBottom: SPACING.md,
-    color: COLORS.subtext,
+    marginBottom: 16,
   },
   button: {
-    marginTop: SPACING.md,
-    backgroundColor: COLORS.primary,
+    marginTop: 16,
     padding: 12,
     borderRadius: 999,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "700",
+    fontWeight: '700',
+  },
+  secondaryButton: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+  },
+  secondaryButtonText: {
+    fontWeight: '700',
   },
 });

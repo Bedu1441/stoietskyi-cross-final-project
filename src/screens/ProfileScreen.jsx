@@ -1,30 +1,97 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import SavedSessionItem from '../components/SavedSessionItem';
+import { removeSavedSession, updateQuantity } from '../redux/slices/savedSessionsSlice';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ProfileScreen() {
+  const dispatch = useDispatch();
+  const savedSessions = useSelector((state) => state.savedSessions.items);
+  const { theme, colors, toggleTheme } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile Screen</Text>
-      <Text style={styles.text}>User profile and settings</Text>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[styles.title, { color: colors.text }]}>Profile</Text>
+
+        <TouchableOpacity
+          style={[styles.themeButton, { backgroundColor: colors.primary }]}
+          onPress={toggleTheme}
+        >
+          <Text style={[styles.themeButtonText, { color: colors.primaryText }]}>
+            Toggle Theme ({theme})
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Saved Sessions (Redux)
+        </Text>
+
+        {savedSessions.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.subtext }]}>
+            No saved sessions yet. Add some from the Sessions screen.
+          </Text>
+        ) : (
+          savedSessions.map((item) => (
+            <SavedSessionItem
+              key={item.id}
+              title={item.title}
+              quantity={item.quantity}
+              onDecrease={() =>
+                dispatch(
+                  updateQuantity({
+                    id: item.id,
+                    quantity: item.quantity - 1,
+                  })
+                )
+              }
+              onIncrease={() =>
+                dispatch(
+                  updateQuantity({
+                    id: item.id,
+                    quantity: item.quantity + 1,
+                  })
+                )
+              }
+              onRemove={() => dispatch(removeSavedSession(item.id))}
+            />
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: "#F5F0E8",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 28,
   },
   title: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#1F2A24",
+    fontWeight: '700',
+    marginBottom: 16,
   },
-  text: {
-    marginTop: 10,
-    color: "#6E756F",
+  themeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    alignSelf: 'flex-start',
+    marginBottom: 24,
+  },
+  themeButtonText: {
+    fontWeight: '700',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 14,
   },
 });

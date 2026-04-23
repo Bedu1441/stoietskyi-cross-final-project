@@ -6,10 +6,16 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
 import SessionListCard from '../components/SessionListCard';
 import { fetchSessions } from '../api/api';
+import { addSavedSession } from '../redux/slices/savedSessionsSlice';
+import { useTheme } from '../context/ThemeContext';
 
 const SessionsScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const { colors } = useTheme();
+
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorText, setErrorText] = useState('');
@@ -33,24 +39,26 @@ const SessionsScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2F7A55" />
-        <Text style={styles.infoText}>Loading sessions...</Text>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.infoText, { color: colors.subtext }]}>
+          Loading sessions...
+        </Text>
       </View>
     );
   }
 
   if (errorText) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{errorText}</Text>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.danger }]}>{errorText}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Explore Sessions</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text }]}>Explore Sessions</Text>
 
       <FlatList
         data={sessions}
@@ -64,6 +72,15 @@ const SessionsScreen = ({ navigation }) => {
                 title: item.title,
                 body: item.body,
               })
+            }
+            onSave={() =>
+              dispatch(
+                addSavedSession({
+                  id: item.id,
+                  title: item.title,
+                  body: item.body,
+                })
+              )
             }
           />
         )}
@@ -80,7 +97,6 @@ export default SessionsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F0E8',
     padding: 20,
   },
   listContent: {
@@ -89,22 +105,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#1F2A24',
     marginBottom: 16,
   },
   centered: {
     flex: 1,
-    backgroundColor: '#F5F0E8',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   infoText: {
     marginTop: 12,
-    color: '#6E756F',
   },
   errorText: {
-    color: '#B00020',
     fontSize: 15,
     textAlign: 'center',
   },
