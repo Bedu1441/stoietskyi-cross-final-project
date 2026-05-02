@@ -1,221 +1,212 @@
-# OIKEON — Cross Assignment 7
+# OIKEON — Cross Final Project
 
 ## Project Overview
 
-OIKEON is a family-centered mobile learning application built with React Native and Expo.
+OIKEON is a family-centered mobile learning application designed to support guided parent-child learning activities.
 
-This assignment focuses on animation, render optimization, and dependency cleanup / bundle optimization.
-
----
-
-## Task 1: Project Analysis
-
-### Component selected for animation
-
-The **Saved Sessions** list in `ProfileScreen` was selected for animation.
-
-Why:
-
-- saved sessions can expand / collapse;
-- quantity can be updated;
-- items can be removed;
-- all of these actions change the layout and are suitable for layout animation.
-
-### Component selected for render optimization
-
-The **SessionListCard** component inside `FlatList` was selected for render optimization.
-
-Why:
-
-- it is rendered many times in a list;
-- it receives callback props;
-- unnecessary rerenders can happen when parent state changes.
-
-### Dependency cleanup / bundle optimization
-
-A lightweight date utility was used:
-
-- `dayjs`
-
-The project avoids heavier date libraries such as `moment`.  
-`dayjs` is used for simple date formatting in the list and details screen.
+The project was developed throughout the Cross-Platform Mobile Development course and then improved as a final project. The goal was not to create a new application from scratch, but to upgrade the existing app with better structure, navigation, global state management, API integration, and improved UX/UI.
 
 ---
 
-## Task 2: Animation
+## Existing App Analysis
 
-Animation was implemented with **LayoutAnimation**.
+The previous version of the app already included:
 
-Location:
+- Home screen with a featured activity
+- Sessions screen with API-loaded learning sessions
+- Session details screen with parameter passing
+- Profile screen with saved sessions
+- Theme switching through Context API
+- Saved sessions management through Redux
 
-- `src/screens/ProfileScreen.jsx`
-- `src/components/SavedSessionItem.jsx`
+### What worked well
 
-Animated interactions:
+- Basic navigation flow was already functional
+- API data was displayed in a list
+- Global state was already introduced
+- The app had a clear educational theme
 
-- expand / collapse saved session item;
-- increase quantity;
-- decrease quantity;
-- remove saved session.
+### Areas selected for improvement
 
-For Android, layout animation support is enabled with:
-
-```javascript
-UIManager.setLayoutAnimationEnabledExperimental?.(true);
-```
-
----
-
-## Task 3: Render Optimization
-
-The following optimizations were implemented:
-
-### React.memo
-
-Used in:
-
-- `SessionListCard.jsx`
-- `SavedSessionItem.jsx`
-
-This prevents unnecessary rerenders when props do not change.
-
-### useCallback
-
-Used in:
-
-- `SessionsScreen.jsx`
-- `ProfileScreen.jsx`
-
-This keeps callback props stable between renders.
-
-### useMemo
-
-Used in:
-
-- `SessionsScreen.jsx`
-- `SessionDetailsScreen.jsx`
-
-This avoids repeated calculations such as preparing visible sessions and formatting dates.
-
-### Verification
-
-Console logs were added to selected components:
-
-```javascript
-console.log("Render SessionListCard:", title);
-console.log("Render SavedSessionItem:", title);
-```
-
-These logs help verify when list items rerender.
+1. Add a new feature section for family learning tips.
+2. Improve the usefulness of the app by adding another API-powered content flow.
+3. Improve navigation and details flow for the new feature.
+4. Document the product decisions and final architecture.
 
 ---
 
-## Task 4: Dependency / Bundle Optimization
+## New Final-Project Feature
 
-The project uses `dayjs` for date formatting.
+### Family Tips
 
-Reason:
+A new **Family Tips** section was added.
 
-- simple API;
-- lightweight;
-- avoids adding heavier date utility libraries.
+This feature loads family-learning tips from an external REST API and displays them in a list. Users can open each tip and view details on a separate screen.
 
-The dependency check was done through `package.json`.
-No unnecessary large utility libraries such as `moment` or full `lodash` are required for the current implementation.
+The feature includes:
 
----
-
-## Screenshots
-
-### Animation — Saved Sessions
-
-![alt text](image.png)
-
-### Before Optimization
-
-![alt text](image-1.png)
-
-### After Optimization
-
-![alt text](image-3.png)
-
-### Bundle / Dependency Check
-
-![alt text](image-2.png)
+- external API request
+- loading state
+- error state
+- empty state
+- FlatList rendering
+- custom `FamilyTipCard` component
+- navigation from list to details
+- route parameter validation
 
 ---
 
-## Project Structure
+## API Integration
 
-```bash
+The project uses JSONPlaceholder as a mock public REST API.
+
+Family tips are loaded from:
+
+```text
+https://jsonplaceholder.typicode.com/comments
+
+The API logic is placed in:
+
+src/api/familyTipsApi.js
+
+The data loading logic is separated into:
+
+src/hooks/useFamilyTips.js
+
+This keeps screens cleaner and improves maintainability.
+
+State Management
+
+The project uses both Context API and Redux.
+
+Context API
+
+Used for:
+
+light / dark theme management
+
+Why Context API:
+
+theme is a global UI setting
+it affects many screens and components
+it does not require complex operations
+Redux
+
+Used for:
+
+saved sessions
+
+Why Redux:
+
+saved sessions need add / remove / update behavior
+the data is shared across screens
+Redux Toolkit keeps this structure predictable
+Navigation
+
+The app uses Tab and Stack navigation.
+
+Main tabs
+Home
+Sessions
+Tips
+Profile
+Stack navigation
+Home → Confirmation
+Sessions → Session Details
+Tips → Tip Details
+
+Navigation parameters are passed from list screens to details screens.
+
+Example:
+
+navigation.navigate('TipDetails', {
+  tipId: item.id,
+  title: item.name,
+  body: item.body,
+  email: item.email,
+});
+Component Structure
+
+New and reused components include:
+
+FamilyTipCard
+SessionListCard
+SavedSessionItem
+SessionCard
+
+Each reusable component is placed in a separate file.
+
+UX/UI Improvements
+
+The final project includes:
+
+cleaner visual hierarchy
+card-based layout
+loading and error states
+retry buttons
+empty state support
+clear details screens
+improved tab navigation
+consistent color palette
+Screenshots
+Home Screen
+
+Sessions Screen
+
+Session Details
+
+Family Tips
+
+Tip Details
+
+Profile / Saved Sessions
+
+Presentation
+
+A short final presentation is included in the presentation folder.
+
+It explains:
+
+the main idea of the app
+the key features
+the new final-project improvement
+state management decisions
+navigation and UX logic
+Project Structure
 src
 ├── api
-│   └── api.js
+│   ├── api.js
+│   └── familyTipsApi.js
 ├── components
+│   ├── FamilyTipCard.jsx
 │   ├── SavedSessionItem.jsx
 │   ├── SessionCard.jsx
 │   └── SessionListCard.jsx
+├── constants
+│   ├── apiConfig.js
+│   ├── finalConfig.js
+│   └── theme.js
 ├── context
 │   └── ThemeContext.js
-├── redux
-│   ├── store.js
-│   └── slices
-│       └── savedSessionsSlice.js
+├── hooks
+│   ├── useFamilyTips.js
+│   └── useSessions.js
 ├── navigation
 │   ├── AppNavigator.js
 │   ├── HomeStack.js
 │   ├── SessionsStack.js
-│   └── TabsNavigator.js
+│   ├── TabsNavigator.js
+│   └── TipsStack.js
+├── redux
+│   ├── store.js
+│   └── slices
+│       └── savedSessionsSlice.js
 └── screens
     ├── ConfirmationScreen.jsx
+    ├── FamilyTipsScreen.jsx
     ├── HomeScreen.jsx
     ├── ProfileScreen.jsx
     ├── SessionDetailsScreen.jsx
-    └── SessionsScreen.jsx
+    ├── SessionsScreen.jsx
+    └── TipDetailsScreen.jsx
 ```
-
----
-
-## How to Run
-
-```bash
-npm install
-npx expo start -c
-```
-
-Then press:
-
-```bash
-w
-```
-
-to open the web version.
-
----
-
-## Technologies Used
-
-- React Native
-- Expo
-- LayoutAnimation
-- React.memo
-- useMemo
-- useCallback
-- Redux Toolkit
-- Context API
-- Day.js
-
----
-
-## Assignment Requirements Covered
-
-- Animation implemented with LayoutAnimation
-- Frequently rerendered list components optimized with React.memo
-- useMemo added for stable derived values
-- useCallback added for stable callback props
-- Dependency review completed
-- Lightweight date utility used
-- README includes explanation of optimizations
-- Screenshots section prepared for before / after and bundle analysis
-
----
