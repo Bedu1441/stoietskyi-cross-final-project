@@ -1,123 +1,107 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   FlatList,
   ActivityIndicator,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import SessionListCard from '../components/SessionListCard';
-import { fetchSessions } from '../api/api';
+import { useSessions } from '../hooks/useSessions';
+import { API_CONFIG, FLAT_LIST_CONFIG } from '../constants/apiConfig';
 import { addSavedSession } from '../redux/slices/savedSessionsSlice';
-import { useTheme } from '../context/ThemeContext';
 
 const SessionsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { colors } = useTheme();
 
-  const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState('');
+  const {
+    sessions,
+    loading,
+    errorText,
+    reloadSessions,
+  } = useSessions(API_CONFIG.DEFAULT_SESSIONS_LIMIT);
 
-  useEffect(() => {
-    loadSessions();
-  }, []);
-
-  const loadSessions = async () => {
-    try {
-      setLoading(true);
-      setErrorText('');
-
-      const data = await fetchSessions();
-      setSessions(data);
-    } catch (error) {
-      setErrorText('Failed to load sessions. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const visibleSessions = useMemo(() => {
-    console.log('useMemo: preparing visible sessions');
-    return sessions.slice(0, 12);
-  }, [sessions]);
-
-  const handleOpenDetails = useCallback(
-    (item) => {
-      navigation.navigate('SessionDetails', {
-        itemId: item.id,
-        title: item.title,
-        body: item.body,
-      });
-    },
-    [navigation]
-  );
-
-  const handleSaveSession = useCallback(
-    (item) => {
-      dispatch(
-        addSavedSession({
-          id: item.id,
+  const renderSession = ({ item }) => (
+    <SessionListCard
+      title={item.title}
+      body={item.body}
+      onPress={() =>
+        navigation.navigate('SessionDetails', {
+          itemId: item.id,
           title: item.title,
           body: item.body,
         })
-      );
-    },
-    [dispatch]
+      }
+      onSave={() =>
+        dispatch(
+          addSavedSession({
+            id: item.id,
+            title: item.title,
+            body: item.body,
+          })
+        )
+      }
+    />
   );
 
-  const renderItem = useCallback(
-    ({ item }) => (
-      <SessionListCard
-        title={item.title}
-        body={item.body}
-        onPress={() => handleOpenDetails(item)}
-        onSave={() => handleSaveSession(item)}
-      />
-    ),
-    [handleOpenDetails, handleSaveSession]
-  );
-
-  const keyExtractor = useCallback((item) => item.id.toString(), []);
-
-  if (loading) {
+  if (loading && sessions.length === 0) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.infoText, { color: colors.subtext }]}>
-          Loading sessions...
-        </Text>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2F7A55" />
+        <Text style={styles.infoText}>Loading sessions...</Text>
       </View>
     );
   }
 
   if (errorText) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.danger }]}>
-          {errorText}
+      <View style={styles.centered}>
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.errorText}>{errorText}</Text>
+
+        <TouchableOpacity style={styles.retryButton} onPress={reloadSessions} activeOpacity={0.7}>
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (sessions.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyTitle}>No sessions found</Text>
+        <Text style={styles.infoText}>
+          There are no learning sessions available right now.
         </Text>
+
+        <TouchableOpacity style={styles.retryButton} onPress={reloadSessions} activeOpacity={0.7}>
+          <Text style={styles.retryButtonText}>Reload</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        Explore Sessions
-      </Text>
-
-      <Text style={[styles.note, { color: colors.subtext }]}>
-        Optimized with React.memo, useMemo and useCallback.
+    <View style={styles.container}>
+      <Text style={styles.title}>Explore Sessions</Text>
+      <Text style={styles.subtitle}>
+        Data loaded from public REST API. Pull down to refresh or save sessions.
       </Text>
 
       <FlatList
-        data={visibleSessions}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
+        data={sessions}
+        renderItem={renderSession}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        initialNumToRender={FLAT_LIST_CONFIG.initialNumToRender}
+        maxToRenderPerBatch={FLAT_LIST_CONFIG.maxToRenderPerBatch}
+        windowSize={FLAT_LIST_CONFIG.windowSize}
+        removeClippedSubviews
+        refreshing={loading}
+        onRefresh={reloadSessions}
       />
     </View>
   );
@@ -128,6 +112,7 @@ export default SessionsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F0E8',
     padding: 20,
   },
   listContent: {
@@ -136,23 +121,52 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 8,
+    color: '#1F2A24',
+    marginBottom: 6,
   },
-  note: {
+  subtitle: {
     fontSize: 13,
+    color: '#6E756F',
     marginBottom: 16,
   },
   centered: {
     flex: 1,
+    backgroundColor: '#F5F0E8',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   infoText: {
     marginTop: 12,
+    color: '#6E756F',
+    textAlign: 'center',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2A24',
+    marginBottom: 8,
   },
   errorText: {
+    color: '#B00020',
     fontSize: 15,
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2A24',
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#2F7A55',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });

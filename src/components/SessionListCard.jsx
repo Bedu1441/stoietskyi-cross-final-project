@@ -1,41 +1,32 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import dayjs from 'dayjs';
-import { useTheme } from '../context/ThemeContext';
 
 const SessionListCard = ({ title, body, onPress, onSave }) => {
-  const { colors } = useTheme();
-
-  console.log('Render AFTER:', title);
-
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
+      <View>
+        <Text style={styles.title}>{title}</Text>
 
-      <Text style={[styles.body, { color: colors.subtext }]} numberOfLines={2}>
-        {body}
-      </Text>
+        <Text style={styles.body} numberOfLines={2}>
+          {body}
+        </Text>
 
-      <Text style={[styles.date, { color: colors.subtext }]}>
-        Updated: {dayjs().format('DD MMM YYYY')}
-      </Text>
+        <View style={styles.actionsRow}>
+          <Text style={styles.link}>Tap to open details</Text>
 
-      <View style={styles.actionsRow}>
-        <Text style={[styles.linkText, { color: colors.primary }]}>Open details</Text>
-
-        <TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: colors.primary }]}
-          onPress={onSave}
-          activeOpacity={0.85}
-        >
-          <Text style={[styles.saveButtonText, { color: colors.primaryText }]}>
-            Save
-          </Text>
-        </TouchableOpacity>
+          {onSave ? (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={(event) => {
+                event.stopPropagation();
+                onSave();
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -43,44 +34,47 @@ const SessionListCard = ({ title, body, onPress, onSave }) => {
 
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: '#FFFDF9',
     borderRadius: 12,
     borderWidth: 1,
+    borderColor: '#E8E0D5',
     padding: 16,
     marginBottom: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: '700',
+    color: '#1F2A24',
     marginBottom: 8,
     textTransform: 'capitalize',
   },
   body: {
     fontSize: 14,
+    color: '#6E756F',
     lineHeight: 20,
   },
-  date: {
-    marginTop: 8,
-    fontSize: 12,
-  },
   actionsRow: {
-    marginTop: 14,
+    marginTop: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  linkText: {
+  link: {
     fontSize: 13,
     fontWeight: '600',
+    color: '#2F7A55',
   },
   saveButton: {
+    backgroundColor: '#2F7A55',
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 999,
   },
   saveButtonText: {
-    fontSize: 13,
+    color: '#FFFFFF',
     fontWeight: '700',
+    fontSize: 13,
   },
 });
 
-export default memo(SessionListCard);
+export default SessionListCard;

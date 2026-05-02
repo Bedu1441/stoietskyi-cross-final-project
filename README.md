@@ -210,3 +210,14 @@ src
     ├── SessionsScreen.jsx
     └── TipDetailsScreen.jsx
 ```
+
+## Additional UX and Code Quality Improvements
+
+The final version also includes small production-oriented improvements:
+
+- Removed / checked deprecated `pointerEvents` usage where applicable
+- Added pull-to-refresh for API-powered lists
+- Added development-only logs for API loading and error tracking
+- Added press feedback to interactive cards and buttons
+
+These changes improve usability, debugging clarity, and overall code quality.

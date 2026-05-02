@@ -40,7 +40,7 @@ const FamilyTipsScreen = ({ navigation }) => {
     />
   );
 
-  if (loading) {
+  if (loading && tips.length === 0) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={FINAL_COLORS.primary} />
@@ -55,7 +55,7 @@ const FamilyTipsScreen = ({ navigation }) => {
         <Text style={styles.errorTitle}>Something went wrong</Text>
         <Text style={styles.errorText}>{errorText}</Text>
 
-        <TouchableOpacity style={styles.button} onPress={reloadTips}>
+        <TouchableOpacity style={styles.button} onPress={reloadTips} activeOpacity={0.7}>
           <Text style={styles.buttonText}>Try Again</Text>
         </TouchableOpacity>
       </View>
@@ -70,7 +70,7 @@ const FamilyTipsScreen = ({ navigation }) => {
           There are no family learning tips available right now.
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={reloadTips}>
+        <TouchableOpacity style={styles.button} onPress={reloadTips} activeOpacity={0.7}>
           <Text style={styles.buttonText}>Reload</Text>
         </TouchableOpacity>
       </View>
@@ -82,7 +82,7 @@ const FamilyTipsScreen = ({ navigation }) => {
       <Text style={styles.title}>Family Tips</Text>
 
       <Text style={styles.subtitle}>
-        New final-project feature: practical learning ideas loaded from an external REST API.
+        New final-project feature. Pull down to refresh learning tips.
       </Text>
 
       <FlatList
@@ -95,6 +95,8 @@ const FamilyTipsScreen = ({ navigation }) => {
         maxToRenderPerBatch={6}
         windowSize={5}
         removeClippedSubviews
+        refreshing={loading}
+        onRefresh={reloadTips}
       />
     </View>
   );

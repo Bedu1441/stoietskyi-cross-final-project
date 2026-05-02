@@ -14,10 +14,18 @@ export const useFamilyTips = (limit = FINAL_API_CONFIG.FAMILY_TIPS_LIMIT) => {
 
       const data = await fetchFamilyTips(limit);
       setTips(data);
+
+      if (__DEV__) {
+        console.log(`Loaded family tips: ${data.length}`);
+      }
     } catch (error) {
       setErrorText(
         error?.message || "Failed to load family tips. Please try again later.",
       );
+
+      if (__DEV__) {
+        console.log("Family tips loading error:", error?.message);
+      }
     } finally {
       setLoading(false);
     }
